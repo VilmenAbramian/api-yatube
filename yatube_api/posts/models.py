@@ -1,6 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
+MAX_TEXT_LEN = 64
+
+
 User = get_user_model()
 
 
@@ -30,7 +33,7 @@ class Post(models.Model):
     )
 
     def __str__(self):
-        return self.text
+        return self.text[0:MAX_TEXT_LEN]
 
 
 class Comment(models.Model):
