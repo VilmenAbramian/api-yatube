@@ -1,4 +1,4 @@
-from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import get_object_or_404
 from rest_framework.permissions import (BasePermission,
                                         IsAuthenticated,
                                         SAFE_METHODS
@@ -11,9 +11,7 @@ from .serializers import CommentSerializer, GroupSerializer, PostSerializer
 
 class IsOwnerOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
-        if request.method in SAFE_METHODS:
-            return True
-        return obj.author == request.user
+        return (request.method in SAFE_METHODS or obj.author == request.user)
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
@@ -34,18 +32,12 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
 
-    def get_post_id(self):
-        post_id = self.kwargs.get('post_id')
-        if Post.objects.get(pk=post_id):
-            return post_id
-        return ObjectDoesNotExist('Отсутствует пост'
-                                  f'с таким post_id: {post_id}!')
+    def get_post(self):
+        return get_object_or_404(Post, pk=self.kwargs.get('post_id'))
 
     def perform_create(self, serializer):
-        post_id = self.get_post_id()
-        serializer.save(author=self.request.user, post_id=post_id)
+        post = self.get_post()
+        serializer.save(author=self.request.user, post=post)
 
     def get_queryset(self):
-        post_id = self.get_post_id()
-        new_queryset = Post.objects.get(pk=post_id).comments.all()
-        return new_queryset
+        return self.get_post().comments.all()
