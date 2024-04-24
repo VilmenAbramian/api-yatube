@@ -107,6 +107,7 @@ GET _.../api/v1/groups/2/_
 ```
 
 Связь с автором: abramian.vl@phystech.edu
+
 Проект-13
 
 ![GitHub top language](https://img.shields.io/github/languages/top/VilmenAbramian/api-yatube)
